@@ -113,7 +113,7 @@ function Track() {
 
   useEffect(() => {
     onSnapshot(collection(getFirestore(), "location"), (snapshot) => {
-      setData(snapshot.docs.find(e => (e.data().customerId == "JIFFY8da42e9b-b2ef-46d6-91de-018659a40afd"))?.data());
+      setData(snapshot.docs.find(e => (e.data().customerId == id))?.data());
     });
 
     navigator.geolocation.watchPosition((w) => { setCorrLoc({ lat: w.coords.latitude, lng: w.coords.longitude }) }, (err) => {
