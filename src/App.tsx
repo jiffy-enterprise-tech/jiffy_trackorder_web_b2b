@@ -2,7 +2,7 @@ import { Typography } from '@mui/joy'
 import { Container } from '@mui/system'
 import { useEffect, useState } from 'react'
 import { GoogleMap, DirectionsRenderer, LoadScript, useJsApiLoader, DirectionsService } from '@react-google-maps/api';
-import { Marker } from '@react-google-maps/api';
+import { MarkerF } from '@react-google-maps/api';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, onSnapshot } from 'firebase/firestore';
 import {
@@ -11,7 +11,8 @@ import {
   Route, useParams
 } from "react-router-dom";
 
-import {MdDeliveryDining} from 'react-icons/md'
+import { MdDeliveryDining } from 'react-icons/md'
+import axios from 'axios';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -89,15 +90,38 @@ function App() {
 
 
 function Track() {
+  let { id } = useParams()
+
+
+  const [ParcelData, setParcelData] = useState<any>(null)
+  const [CustData, setCustData] = useState<any>(null)
+
   const [Data, setData] = useState<any>(null)
 
-  const [Center, setCenter] = useState<any>(null)
+  //const [Center, setCenter] = useState<any>(null)
+
 
 
   const [CorrLoc, setCorrLoc] = useState({
     lat: 11.1407247,
     lng: 75.964
   })
+
+
+  function getEndLoc(){
+    if(!CustData||!ParcelData)return null
+
+    let Pickup=ParcelData?.parcel?.[0]?.pickup.filter((e: any) => e.pickup_status == "pending")
+    let Del=ParcelData?.parcel?.[0]?.delivery[0]
+    if(Pickup.length>0){
+      
+       
+      return {lat:Number(Pickup[0].pickup_latitude),lng:Number(Pickup[0].pickup_latitude)}
+
+     }else{
+      return {lat:Number(Del.delivery_latitude),lng:Number(Del.delivery_longitude)}
+     }
+  }
 
 
 
@@ -112,93 +136,151 @@ function Track() {
 
 
   useEffect(() => {
-    onSnapshot(collection(getFirestore(), "location"), (snapshot) => {
-      setData(snapshot.docs.find(e => (e.data().customerId == id))?.data());
-    });
 
-    navigator.geolocation.watchPosition((w) => { setCorrLoc({ lat: w.coords.latitude, lng: w.coords.longitude }) }, (err) => {
-      console.log(err);
-    }, {
-      enableHighAccuracy: true,
+
+    // navigator.geolocation.watchPosition((w) => { setCorrLoc({ lat: w.coords.latitude, lng: w.coords.longitude }) }, (err) => {
+    //   console.log(err);
+    // }, {
+    //   enableHighAccuracy: true,
+    // })
+
+    axios.get("https://apis.jiffy.ae/vendor/api/v1/parcel", { params: { _id: id } }).then(({ data }) => {
+      if (data.status == "Success") {
+        setParcelData(data)
+      } else {
+        setParcelData({ err: "ERRO" })
+      }
+
     })
+
   }, [0])
 
 
   useEffect(() => {
-    console.log("newwwwwwwwwwwwwww", Data, id);
-    if (Data) {
-      setCenter({
-        lat: Data.latitude,
-        lng: Data.longitude
-      })
-    }
-  }, [Data])
+    // console.log("newwwwwwwwwwwwwww", Data, id);
+    // if (Data) {
+    //   setCenter({
+    //     lat: Data.latitude,
+    //     lng: Data.longitude
+    //   })
+    // }
 
-  let { id } = useParams()
+    if (ParcelData?.parcel?.[0]?.customer_id) {
+      onSnapshot(collection(getFirestore(), "location"), (snapshot) => {
+        let _cusId = ParcelData.parcel[0].customer_id
+        setCustData(snapshot.docs.find(e => (e.data().customerId == _cusId, _cusId))?.data());
+      // console.log(snapshot.docs.map(e=>e.data()));
+
+      });
+    } else {
+      setCustData({ err: "customer id is not provided" })
+    }
+  }, [ParcelData])
+
 
   return (
     <div>{id}
-      long:{CorrLoc.lng}
+      {/* long:{CorrLoc.lng}
       lat:{CorrLoc.lat}
+      <div>
+        {JSON.stringify(CustData)}
+      </div>
+      {CustData?.err && <>{CustData.err}sss</>}
+      {loadError&&<div>ere</div>} */}
+      {/* {getEndLoc()&&<div>{JSON.stringify(getEndLoc())}</div>} */}
       {
-        Data && Center && isLoaded &&
-
-        <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={Center}
-          zoom={10}
-        >
-
-
-          <Marker
-
-position={Center} />
-          <Marker position={CorrLoc} />
-          <DirectionsService
-            // required
-            options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-              destination: Center,
-              origin: CorrLoc,
-              ///@ts-ignore
-              travelMode: `DRIVING`
+        isLoaded && CustData?.latitude ?
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={{
+              lat: Number(CustData.latitude),
+              lng: Number(CustData.longitude)
             }}
-            // required
-            callback={(e) => {
-              console.log(e);
-              if (!e || Direct) {
+            zoom={10}
+          >
 
-              } else {
+            <MarkerF
+              icon={"https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"}
+              position={{
+                lat: Number(CustData.latitude),
+                lng: Number(CustData.longitude)
+              }} />
 
-                setDirect(e)
-              }
+            <MarkerF
+              icon={{url:"/delivery.svg",scale:.1}}
+              position={{
+                lat: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_latitude),
+                lng:Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_longitude),
+              }} />
 
-            }}
-            // optional
-            onLoad={directionsService => {
-              console.log('DirectionsService onLoad directionsService: ', directionsService)
-            }}
-            // optional
-            onUnmount={directionsService => {
-              console.log('DirectionsService onUnmount directionsService: ', directionsService)
-            }}
-          />
-          {
-            Direct && <DirectionsRenderer
-              // required
+
+            {ParcelData?.parcel?.[0]?.pickup
+            .filter((e: any) => e.pickup_status == "pending")
+            .map((e: any) => (
+
+              <MarkerF
+              key={e.id}
+              onLoad={(_e)=>{console.log(e.id);
+              }}
+              icon="/pickup.svg"
+              position={{
+                  lat: Number(e.pickup_latitude),
+                  lng: Number(e.pickup_longitude)
+                }} />
+            ))}
+
+           {getEndLoc()&& <DirectionsService
+              required
               options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                directions: Direct
+                destination:getEndLoc()||{},
+                origin: {
+                  lat: Number(CustData.latitude),
+                  lng: Number(CustData.longitude)
+                },
+                ///@ts-ignore
+                travelMode: `DRIVING`
+              }}
+              // required
+              callback={(e) => {
+                console.log(e);
+                if (!e || Direct) {
+
+                } else {
+
+                  setDirect(e)
+                }
+
               }}
               // optional
-              onLoad={directionsRenderer => {
-                console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+              onLoad={directionsService => {
+                console.log('DirectionsService onLoad directionsService: ', directionsService)
               }}
               // optional
-              onUnmount={directionsRenderer => {
-                console.log('DirectionsRenderer onUnmount directionsRenderer: ', directionsRenderer)
+              onUnmount={directionsService => {
+                console.log('DirectionsService onUnmount directionsService: ', directionsService)
               }}
-            />
-          }
-        </GoogleMap>
+            />}
+            {Direct.state=="ZERO_RESULTS"&&<div>
+              No path found from Origin to Destination
+              </div>}
+            {
+              Direct && <DirectionsRenderer
+                // required
+                options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
+                  directions: Direct
+                }}
+                // optional
+                onLoad={directionsRenderer => {
+                  console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+                }}
+                // optional
+                onUnmount={directionsRenderer => {
+                  console.log('DirectionsRenderer onUnmount directionsRenderer: ', directionsRenderer)
+                }}
+              />
+            }
+          </GoogleMap> : <div>Loading</div>
+
 
 
       }
