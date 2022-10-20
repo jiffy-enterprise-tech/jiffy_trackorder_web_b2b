@@ -260,7 +260,7 @@ function Track() {
                 console.log('DirectionsService onUnmount directionsService: ', directionsService)
               }}
             />}
-            {Direct.state=="ZERO_RESULTS"&&<div>
+            {Direct?.state=="ZERO_RESULTS"&&<div>
               No path found from Origin to Destination
               </div>}
             {
