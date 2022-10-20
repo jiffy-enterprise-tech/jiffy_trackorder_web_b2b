@@ -355,11 +355,11 @@ function Track() {
         background:#DDF1FF;
         padding:15px;
         border-radius:10px;
-        color:#072859;
+        color:#02367D;
         
         `}>
 
-          <Typography level="h5">
+          <Typography color="primary" level="h5">
             Pickup Address
           </Typography>
           <Typography level="body2">
@@ -372,10 +372,10 @@ function Track() {
         background:#DDF1FF;
         padding:15px;
         border-radius:10px;
-        color:#072859;
+        color:#02367D;
         
         `}>
-        <Typography level="h5">
+        <Typography color="primary" level="h5">
           Delivery Address
           </Typography>
           <Typography level="body2">
@@ -383,16 +383,17 @@ function Track() {
           </Typography>
         </div>
 
+        <Divider></Divider>
         <div className={css`
         margin:15px;
-        background:#DDF1FF;
+
         padding:15px;
         border-radius:10px;
-        color:#072859;
+        color:#02367D;
         
         `}>
 
-        <Typography level="h5">
+        <Typography color="primary" level="h5">
           Delivery Status
           </Typography>
           <Typography level="body2">
