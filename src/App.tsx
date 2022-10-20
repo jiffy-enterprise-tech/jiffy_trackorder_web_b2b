@@ -108,19 +108,19 @@ function Track() {
   })
 
 
-  function getEndLoc(){
-    if(!CustData||!ParcelData)return null
+  function getEndLoc() {
+    if (!CustData || !ParcelData) return null
 
-    let Pickup=ParcelData?.parcel?.[0]?.pickup.filter((e: any) => e.pickup_status == "pending")
-    let Del=ParcelData?.parcel?.[0]?.delivery[0]
-    if(Pickup.length>0){
-      
-       
-      return {lat:Number(Pickup[0].pickup_latitude),lng:Number(Pickup[0].pickup_latitude)}
+    let Pickup = ParcelData?.parcel?.[0]?.pickup.filter((e: any) => e.pickup_status == "pending")
+    let Del = ParcelData?.parcel?.[0]?.delivery[0]
+    if (Pickup.length > 0) {
 
-     }else{
-      return {lat:Number(Del.delivery_latitude),lng:Number(Del.delivery_longitude)}
-     }
+
+      return { lat: Number(Pickup[0].pickup_latitude), lng: Number(Pickup[0].pickup_latitude) }
+
+    } else {
+      return { lat: Number(Del.delivery_latitude), lng: Number(Del.delivery_longitude) }
+    }
   }
 
 
@@ -169,7 +169,7 @@ function Track() {
       onSnapshot(collection(getFirestore(), "location"), (snapshot) => {
         let _cusId = ParcelData.parcel[0].customer_id
         setCustData(snapshot.docs.find(e => (e.data().customerId == _cusId, _cusId))?.data());
-      // console.log(snapshot.docs.map(e=>e.data()));
+        // console.log(snapshot.docs.map(e=>e.data()));
 
       });
     } else {
@@ -188,6 +188,11 @@ function Track() {
       {CustData?.err && <>{CustData.err}sss</>}
       {loadError&&<div>ere</div>} */}
       {/* {getEndLoc()&&<div>{JSON.stringify(getEndLoc())}</div>} */}
+      {Direct?.status == "ZERO_RESULTS" && <div>
+        <Typography color='danger' level='h4'>
+        No path found from Origin to Destination
+        </Typography>
+      </div>}
       {
         isLoaded && CustData?.latitude ?
           <GoogleMap
@@ -207,32 +212,33 @@ function Track() {
               }} />
 
             <MarkerF
-              icon={{url:"/delivery.svg",scale:.1}}
+              icon={{ url: "/delivery.svg", scale: .1 }}
               position={{
                 lat: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_latitude),
-                lng:Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_longitude),
+                lng: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_longitude),
               }} />
 
 
             {ParcelData?.parcel?.[0]?.pickup
-            .filter((e: any) => e.pickup_status == "pending")
-            .map((e: any) => (
+              .filter((e: any) => e.pickup_status == "pending")
+              .map((e: any) => (
 
-              <MarkerF
-              key={e.id}
-              onLoad={(_e)=>{console.log(e.id);
-              }}
-              icon="/pickup.svg"
-              position={{
-                  lat: Number(e.pickup_latitude),
-                  lng: Number(e.pickup_longitude)
-                }} />
-            ))}
+                <MarkerF
+                  key={e.id}
+                  onLoad={(_e) => {
+                    console.log(e.id);
+                  }}
+                  icon="/pickup.svg"
+                  position={{
+                    lat: Number(e.pickup_latitude),
+                    lng: Number(e.pickup_longitude)
+                  }} />
+              ))}
 
-           {getEndLoc()&& <DirectionsService
+            {getEndLoc() && <DirectionsService
               required
               options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                destination:getEndLoc()||{},
+                destination: getEndLoc() || {},
                 origin: {
                   lat: Number(CustData.latitude),
                   lng: Number(CustData.longitude)
@@ -260,9 +266,7 @@ function Track() {
                 console.log('DirectionsService onUnmount directionsService: ', directionsService)
               }}
             />}
-            {Direct?.state=="ZERO_RESULTS"&&<div>
-              No path found from Origin to Destination
-              </div>}
+
             {
               Direct && <DirectionsRenderer
                 // required
