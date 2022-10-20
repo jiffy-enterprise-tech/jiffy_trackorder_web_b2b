@@ -1,5 +1,5 @@
-import { Typography } from '@mui/joy'
-import { Container } from '@mui/system'
+import { Stack, Typography, Alert, Box, IconButton, Container, CircularProgress, Divider } from '@mui/joy'
+
 import { useEffect, useState } from 'react'
 import { GoogleMap, DirectionsRenderer, LoadScript, useJsApiLoader, DirectionsService } from '@react-google-maps/api';
 import { MarkerF } from '@react-google-maps/api';
@@ -10,8 +10,9 @@ import {
   RouterProvider,
   Route, useParams
 } from "react-router-dom";
+import { css } from '@emotion/css'
+import { AiFillCloseCircle } from 'react-icons/ai'
 
-import { MdDeliveryDining } from 'react-icons/md'
 import axios from 'axios';
 const router = createBrowserRouter([
   {
@@ -26,8 +27,10 @@ const router = createBrowserRouter([
 
 
 const containerStyle = {
-  width: '600px',
-  height: '500px'
+  width: 'min(800px,100vw)',
+  height: '500px',
+  borderRadius: "10px",
+  margin: "30px auto"
 };
 
 
@@ -179,7 +182,43 @@ function Track() {
 
 
   return (
-    <div>{id}
+    <div className={css`
+    background-image:url(https://jiffy.ae/Images/banner.png);
+    background-size:contain;
+    `}>
+
+      <div className={
+        css`
+            
+            width:100%;
+            padding:20px 30px;
+            box-sizing: border-box;
+            line-height:1;
+        `
+      }>
+        <div>
+          <div className={css`
+          display:grid;
+          grid-template-columns: auto 1fr;
+
+          `}>
+
+            <Typography level="h2">
+              Track Order
+            </Typography>
+            <div className={css`
+              width:100%;
+              height:5px;
+              background:darkblue;
+              margin:auto 20px;
+              transform:translateY(50%)
+            `}>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* long:{CorrLoc.lng}
       lat:{CorrLoc.lat}
       <div>
@@ -188,106 +227,182 @@ function Track() {
       {CustData?.err && <>{CustData.err}sss</>}
       {loadError&&<div>ere</div>} */}
       {/* {getEndLoc()&&<div>{JSON.stringify(getEndLoc())}</div>} */}
-      {Direct?.status == "ZERO_RESULTS" && <div>
-        <Typography color='danger' level='h4'>
-        No path found from Origin to Destination
-        </Typography>
-      </div>}
-      {
-        isLoaded && CustData?.latitude ?
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={{
-              lat: Number(CustData.latitude),
-              lng: Number(CustData.longitude)
-            }}
-            zoom={10}
-          >
+      {Direct?.status == "ZERO_RESULTS" && <Box>
+        {/* <Typography color='danger' level='h4'>
+          No path found from Origin to Destination
+        </Typography> */}
 
-            <MarkerF
-              icon={"https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"}
-              position={{
+
+        <Alert sx={{ borderRadius: "0" }} variant='solid'
+          startDecorator={
+
+            <AiFillCloseCircle size={20}></AiFillCloseCircle>
+
+          }
+
+          color='danger'>
+
+          No path found from Origin to Destination
+
+        </Alert>
+      </Box>}
+
+      <Container>
+        {
+          isLoaded && CustData?.latitude ?
+            <GoogleMap
+              mapContainerStyle={containerStyle}
+              center={{
                 lat: Number(CustData.latitude),
                 lng: Number(CustData.longitude)
-              }} />
+              }}
+              zoom={10}
+            >
 
-            <MarkerF
-              icon={{ url: "/delivery.svg", scale: .1 }}
-              position={{
-                lat: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_latitude),
-                lng: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_longitude),
-              }} />
-
-
-            {ParcelData?.parcel?.[0]?.pickup
-              .filter((e: any) => e.pickup_status == "pending")
-              .map((e: any) => (
-
-                <MarkerF
-                  key={e.id}
-                  onLoad={(_e) => {
-                    console.log(e.id);
-                  }}
-                  icon="/pickup.svg"
-                  position={{
-                    lat: Number(e.pickup_latitude),
-                    lng: Number(e.pickup_longitude)
-                  }} />
-              ))}
-
-            {getEndLoc() && <DirectionsService
-              required
-              options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                destination: getEndLoc() || {},
-                origin: {
+              <MarkerF
+                icon={"https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"}
+                position={{
                   lat: Number(CustData.latitude),
                   lng: Number(CustData.longitude)
-                },
-                ///@ts-ignore
-                travelMode: `DRIVING`
-              }}
-              // required
-              callback={(e) => {
-                console.log(e);
-                if (!e || Direct) {
+                }} />
 
-                } else {
+              <MarkerF
+                icon={{ url: "/delivery.svg", scale: .1 }}
+                position={{
+                  lat: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_latitude),
+                  lng: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_longitude),
+                }} />
 
-                  setDirect(e)
-                }
 
-              }}
-              // optional
-              onLoad={directionsService => {
-                console.log('DirectionsService onLoad directionsService: ', directionsService)
-              }}
-              // optional
-              onUnmount={directionsService => {
-                console.log('DirectionsService onUnmount directionsService: ', directionsService)
-              }}
-            />}
+              {ParcelData?.parcel?.[0]?.pickup
+                .filter((e: any) => e.pickup_status == "pending")
+                .map((e: any) => (
 
-            {
-              Direct && <DirectionsRenderer
-                // required
+                  <MarkerF
+                    key={e.id}
+                    onLoad={(_e) => {
+                      console.log(e.id);
+                    }}
+                    icon="/pickup.svg"
+                    position={{
+                      lat: Number(e.pickup_latitude),
+                      lng: Number(e.pickup_longitude)
+                    }} />
+                ))}
+
+              {getEndLoc() && <DirectionsService
+                required
                 options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                  directions: Direct
+                  destination: getEndLoc() || {},
+                  origin: {
+                    lat: Number(CustData.latitude),
+                    lng: Number(CustData.longitude)
+                  },
+                  ///@ts-ignore
+                  travelMode: `DRIVING`
+                }}
+                // required
+                callback={(e) => {
+                  console.log(e);
+                  if (!e || Direct) {
+
+                  } else {
+
+                    setDirect(e)
+                  }
+
                 }}
                 // optional
-                onLoad={directionsRenderer => {
-                  console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+                onLoad={directionsService => {
+                  console.log('DirectionsService onLoad directionsService: ', directionsService)
                 }}
                 // optional
-                onUnmount={directionsRenderer => {
-                  console.log('DirectionsRenderer onUnmount directionsRenderer: ', directionsRenderer)
+                onUnmount={directionsService => {
+                  console.log('DirectionsService onUnmount directionsService: ', directionsService)
                 }}
-              />
-            }
-          </GoogleMap> : <div>Loading</div>
+              />}
+
+              {
+                Direct && <DirectionsRenderer
+                  // required
+                  options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
+                    directions: Direct
+                  }}
+                  // optional
+                  onLoad={directionsRenderer => {
+                    console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+                  }}
+                  // optional
+                  onUnmount={directionsRenderer => {
+                    console.log('DirectionsRenderer onUnmount directionsRenderer: ', directionsRenderer)
+                  }}
+                />
+              }
+            </GoogleMap> : <div className={css`
+                height:80vh;
+                display:flex
+          `}>
+              <CircularProgress sx={{ margin: "auto" }} size="lg" />
+            </div>
 
 
 
-      }
+
+        }
+        <Divider></Divider>
+        <div className={css`
+        margin:15px;
+        background:#DDF1FF;
+        padding:15px;
+        border-radius:10px;
+        color:#072859;
+        
+        `}>
+
+          <Typography level="h5">
+            Pickup Address
+          </Typography>
+          <Typography level="body2">
+            {ParcelData?.parcel?.[0]?.pickup_location}
+          </Typography>
+
+        </div>
+        <div className={css`
+        margin:15px;
+        background:#DDF1FF;
+        padding:15px;
+        border-radius:10px;
+        color:#072859;
+        
+        `}>
+        <Typography level="h5">
+          Delivery Address
+          </Typography>
+          <Typography level="body2">
+            {ParcelData?.parcel?.[0]?.delivery_location}
+          </Typography>
+        </div>
+
+        <div className={css`
+        margin:15px;
+        background:#DDF1FF;
+        padding:15px;
+        border-radius:10px;
+        color:#072859;
+        
+        `}>
+
+        <Typography level="h5">
+          Delivery Status
+          </Typography>
+          <Typography level="body2">
+            {ParcelData?.parcel?.[0]?.delivery_status}
+          </Typography>
+        </div>
+      </Container>
+
+
+
     </div>
   )
 }
