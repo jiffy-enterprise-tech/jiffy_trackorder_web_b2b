@@ -27,7 +27,7 @@ const router = createBrowserRouter([
 
 
 const containerStyle = {
-  width: 'min(800px,100vw)',
+  width: 'min(800px,calc(100vw-20px))',
   height: '500px',
   borderRadius: "10px",
   margin: "30px auto"
@@ -181,6 +181,9 @@ function Track() {
   }, [ParcelData])
 
 
+
+
+
   return (
     <div className={css`
     background-image:url(https://jiffy.ae/Images/banner.png);
@@ -250,95 +253,109 @@ function Track() {
       <Container>
         {
           isLoaded && CustData?.latitude ?
-            <GoogleMap
-              mapContainerStyle={containerStyle}
-              center={{
-                lat: Number(CustData.latitude),
-                lng: Number(CustData.longitude)
-              }}
-              zoom={10}
-            >
-
-              <MarkerF
-                icon={"https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"}
-                position={{
+            <>{(ParcelData?.parcel?.[0]?.delivery_status == "pending" ||ParcelData?.parcel?.[0]?.delivery_status == "pickedup") &&
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={{
                   lat: Number(CustData.latitude),
                   lng: Number(CustData.longitude)
-                }} />
+                }}
+                zoom={10}
+              >
 
-              <MarkerF
-                icon={{ url: "/delivery.svg", scale: .1 }}
-                position={{
-                  lat: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_latitude),
-                  lng: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_longitude),
-                }} />
-
-
-              {ParcelData?.parcel?.[0]?.pickup
-                .filter((e: any) => e.pickup_status == "pending")
-                .map((e: any) => (
-
-                  <MarkerF
-                    key={e.id}
-                    onLoad={(_e) => {
-                      console.log(e.id);
-                    }}
-                    icon="/pickup.svg"
-                    position={{
-                      lat: Number(e.pickup_latitude),
-                      lng: Number(e.pickup_longitude)
-                    }} />
-                ))}
-
-              {getEndLoc() && <DirectionsService
-                required
-                options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                  destination: getEndLoc() || {},
-                  origin: {
+                <MarkerF
+                  icon={"https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"}
+                  position={{
                     lat: Number(CustData.latitude),
                     lng: Number(CustData.longitude)
-                  },
-                  ///@ts-ignore
-                  travelMode: `DRIVING`
-                }}
-                // required
-                callback={(e) => {
-                  console.log(e);
-                  if (!e || Direct) {
+                  }} />
 
-                  } else {
+                <MarkerF
+                  icon={{ url: "/delivery.svg", scale: .1 }}
+                  position={{
+                    lat: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_latitude),
+                    lng: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_longitude),
+                  }} />
 
-                    setDirect(e)
-                  }
 
-                }}
-                // optional
-                onLoad={directionsService => {
-                  console.log('DirectionsService onLoad directionsService: ', directionsService)
-                }}
-                // optional
-                onUnmount={directionsService => {
-                  console.log('DirectionsService onUnmount directionsService: ', directionsService)
-                }}
-              />}
+                {ParcelData?.parcel?.[0]?.pickup
+                  .filter((e: any) => e.pickup_status == "pending")
+                  .map((e: any) => (
 
-              {
-                Direct && <DirectionsRenderer
-                  // required
+                    <MarkerF
+                      key={e.id}
+                      onLoad={(_e) => {
+                        console.log(e.id);
+                      }}
+                      icon="/pickup.svg"
+                      position={{
+                        lat: Number(e.pickup_latitude),
+                        lng: Number(e.pickup_longitude)
+                      }} />
+                  ))}
+
+                {getEndLoc() && <DirectionsService
+                  required
                   options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                    directions: Direct
+                    destination: getEndLoc() || {},
+                    origin: {
+                      lat: Number(CustData.latitude),
+                      lng: Number(CustData.longitude)
+                    },
+                    ///@ts-ignore
+                    travelMode: `DRIVING`
+                  }}
+                  // required
+                  callback={(e) => {
+                    console.log(e);
+                    if (!e || Direct) {
+
+                    } else {
+
+                      setDirect(e)
+                    }
+
                   }}
                   // optional
-                  onLoad={directionsRenderer => {
-                    console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+                  onLoad={directionsService => {
+                    console.log('DirectionsService onLoad directionsService: ', directionsService)
                   }}
                   // optional
-                  onUnmount={directionsRenderer => {
-                    console.log('DirectionsRenderer onUnmount directionsRenderer: ', directionsRenderer)
+                  onUnmount={directionsService => {
+                    console.log('DirectionsService onUnmount directionsService: ', directionsService)
                   }}
-                />
+                />}
+
+                {
+                  Direct && <DirectionsRenderer
+                    // required
+                    options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
+                      directions: Direct
+                    }}
+                    // optional
+                    onLoad={directionsRenderer => {
+                      console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+                    }}
+                    // optional
+                    onUnmount={directionsRenderer => {
+                      console.log('DirectionsRenderer onUnmount directionsRenderer: ', directionsRenderer)
+                    }}
+                  />
+                }
+              </GoogleMap>}
+              {
+                ParcelData?.parcel?.[0]?.delivery_status == "delivered" &&
+                <div  className={css`
+                height:80vh;
+                display:flex
+          `}>
+                  <Typography  sx={{ margin: "auto" }} color="success" level='h1'>
+                    Order is delivered
+                  </Typography>
+                </div>
               }
-            </GoogleMap> : <div className={css`
+            </>
+            : <div className={css`
                 height:80vh;
                 display:flex
           `}>
@@ -375,8 +392,8 @@ function Track() {
         color:#02367D;
         
         `}>
-        <Typography color="primary" level="h5">
-          Delivery Address
+          <Typography color="primary" level="h5">
+            Delivery Address
           </Typography>
           <Typography level="body2">
             {ParcelData?.parcel?.[0]?.delivery_location}
@@ -393,8 +410,8 @@ function Track() {
         
         `}>
 
-        <Typography color="primary" level="h5">
-          Delivery Status
+          <Typography color="primary" level="h5">
+            Delivery Status
           </Typography>
           <Typography level="body2">
             {ParcelData?.parcel?.[0]?.delivery_status}
