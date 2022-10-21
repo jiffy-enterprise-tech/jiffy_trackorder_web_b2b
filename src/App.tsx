@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { GoogleMap, DirectionsRenderer, LoadScript, useJsApiLoader, DirectionsService } from '@react-google-maps/api';
 import { MarkerF } from '@react-google-maps/api';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -53,6 +53,11 @@ const db = getFirestore(app);
 //   });
 //   console.log("newwwwwwwwwwwwwww", this.state.data);
 // });
+
+
+let _CustData=""
+
+
 function App() {
 
 
@@ -109,17 +114,18 @@ function Track() {
     lat: 11.1407247,
     lng: 75.964
   })
-
+  let Par=ParcelData?.parcel?.[0]
 
   function getEndLoc() {
     if (!CustData || !ParcelData) return null
+    
 
-    let Pickup = ParcelData?.parcel?.[0]?.pickup.filter((e: any) => e.pickup_status == "pending")
-    let Del = ParcelData?.parcel?.[0]?.delivery[0]
+    let Pickup = Par?.pickup.filter((e: any) => e.pickup_status == "pending")
+    let Del = Par?.delivery[0]
     if (Pickup.length > 0) {
 
 
-      return { lat: Number(Pickup[0].pickup_latitude), lng: Number(Pickup[0].pickup_latitude) }
+      return { lat: Number(Pickup[0].pickup_latitude), lng: Number(Pickup[0].pickup_longitude) }
 
     } else {
       return { lat: Number(Del.delivery_latitude), lng: Number(Del.delivery_longitude) }
@@ -135,7 +141,7 @@ function Track() {
 
 
   const [Direct, setDirect] = useState<any>(null)
-
+  const [UpDirect, setUpDirect] = useState(false)
 
 
   useEffect(() => {
@@ -168,11 +174,20 @@ function Track() {
     //   })
     // }
 
-    if (ParcelData?.parcel?.[0]?.customer_id) {
+    if (Par?.customer_id) {
       onSnapshot(collection(getFirestore(), "location"), (snapshot) => {
         let _cusId = ParcelData.parcel[0].customer_id
         setCustData(snapshot.docs.find(e => (e.data().customerId == _cusId, _cusId))?.data());
-        // console.log(snapshot.docs.map(e=>e.data()));
+        setUpDirect(false)
+       console.log(snapshot.docs.map(e=>e.data()));
+      //  collection(getFirestore(), "location")
+
+      
+     
+      // console.log(,"qq");
+     
+      
+
 
       });
     } else {
@@ -253,7 +268,14 @@ function Track() {
       <Container>
         {
           isLoaded && CustData?.latitude ?
-            <>{(ParcelData?.parcel?.[0]?.delivery_status == "pending" ||ParcelData?.parcel?.[0]?.delivery_status == "pickedup") &&
+            <>{(Par?.order_status  !== "Delivered"|| Par?.order_status  !== "Cancelled")&&
+              <>
+              <Typography sx={{marginTop:"10px"}} color="success" level='h6'>
+                Order Status: 
+              </Typography>
+              <Typography  color="success" level="body1">
+                {Par?.order_status}
+              </Typography>
               <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={{
@@ -273,12 +295,12 @@ function Track() {
                 <MarkerF
                   icon={{ url: "/delivery.svg", scale: .1 }}
                   position={{
-                    lat: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_latitude),
-                    lng: Number(ParcelData?.parcel?.[0]?.delivery?.[0].delivery_longitude),
+                    lat: Number(Par?.delivery?.[0].delivery_latitude),
+                    lng: Number(Par?.delivery?.[0].delivery_longitude),
                   }} />
 
 
-                {ParcelData?.parcel?.[0]?.pickup
+                {Par?.pickup
                   .filter((e: any) => e.pickup_status == "pending")
                   .map((e: any) => (
 
@@ -294,8 +316,8 @@ function Track() {
                       }} />
                   ))}
 
-                {getEndLoc() && <DirectionsService
-                  required
+                {getEndLoc()&& !UpDirect && <DirectionsService
+                  
                   options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
                     destination: getEndLoc() || {},
                     origin: {
@@ -303,16 +325,14 @@ function Track() {
                       lng: Number(CustData.longitude)
                     },
                     ///@ts-ignore
-                    travelMode: `DRIVING`
+                    travelMode: google.maps.TravelMode.DRIVING
                   }}
                   // required
                   callback={(e) => {
-                    console.log(e);
-                    if (!e || Direct) {
-
-                    } else {
-
+                    //console.log(JSON.stringify(e)==JSON.stringify(Direct),"qq",e,Direct);
+                    if (e) {
                       setDirect(e)
+                      setUpDirect(true)
                     }
 
                   }}
@@ -342,9 +362,9 @@ function Track() {
                     }}
                   />
                 }
-              </GoogleMap>}
+              </GoogleMap></>}
               {
-                ParcelData?.parcel?.[0]?.delivery_status == "delivered" &&
+                Par?.order_status  == "Delivered" &&
                 <div  className={css`
                 height:80vh;
                 display:flex
@@ -367,6 +387,8 @@ function Track() {
 
         }
         <Divider></Divider>
+     
+     
         <div className={css`
         margin:15px;
         background:#DDF1FF;
@@ -380,7 +402,7 @@ function Track() {
             Pickup Address
           </Typography>
           <Typography level="body2">
-            {ParcelData?.parcel?.[0]?.pickup_location}
+            {Par?.pickup_location}
           </Typography>
 
         </div>
@@ -396,7 +418,7 @@ function Track() {
             Delivery Address
           </Typography>
           <Typography level="body2">
-            {ParcelData?.parcel?.[0]?.delivery_location}
+            {Par?.delivery_location}
           </Typography>
         </div>
 
@@ -414,7 +436,7 @@ function Track() {
             Delivery Status
           </Typography>
           <Typography level="body2">
-            {ParcelData?.parcel?.[0]?.delivery_status}
+            {Par?.delivery_status}
           </Typography>
         </div>
       </Container>
