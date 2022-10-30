@@ -286,14 +286,14 @@ function Track() {
               >
 
                 <MarkerF
-                  icon={"/pickup.svg"}
+                  icon={"/delivery.svg"}
                   position={{
                     lat: Number(CustData.latitude),
                     lng: Number(CustData.longitude)
                   }} />
 
                 <MarkerF
-                  icon={{ url: "/delivery.svg", scale: .1 }}
+                  icon={{ url:"https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png", scale: .1 }}
                   position={{
                     lat: Number(Par?.delivery?.[0].delivery_latitude),
                     lng: Number(Par?.delivery?.[0].delivery_longitude),
@@ -309,7 +309,7 @@ function Track() {
                       onLoad={(_e) => {
                         console.log(e.id);
                       }}
-                      icon="https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"
+                      icon="/pickup.svg"
                       position={{
                         lat: Number(e.pickup_latitude),
                         lng: Number(e.pickup_longitude)
