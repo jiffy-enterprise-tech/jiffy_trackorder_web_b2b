@@ -177,7 +177,7 @@ let _cusId = ParcelData.parcel[0].customer_id
     if (Par?.customer_id) {
       onSnapshot(query(collection(getFirestore(), "location"),where("customerId","==",_cusId)), (snapshot) => {
         
-        setCustData(snapshot.docs.map(e=>e.data()));
+       // setCustData(snapshot.docs.map(e=>e.data()));
         setUpDirect(false)
        console.log(snapshot.docs.map(e=>e.data()),"erafsdfsdf");
       //  collection(getFirestore(), "location")
