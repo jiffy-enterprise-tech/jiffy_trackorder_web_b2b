@@ -179,7 +179,7 @@ let _cusId = ParcelData.parcel[0].customer_id
         
         setCustData(snapshot.docs[0].data());
         setUpDirect(false)
-       console.log(snapshot.docs.map(e=>e.data()));
+       console.log(snapshot.docs.map(e=>e.data()),"erafsdfsdf");
       //  collection(getFirestore(), "location")
 
       
