@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { GoogleMap, DirectionsRenderer, LoadScript, useJsApiLoader, DirectionsService } from '@react-google-maps/api';
 import { MarkerF } from '@react-google-maps/api';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, query,where, getDocs, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -173,11 +173,11 @@ function Track() {
     //     lng: Data.longitude
     //   })
     // }
-
+let _cusId = ParcelData.parcel[0].customer_id
     if (Par?.customer_id) {
-      onSnapshot(collection(getFirestore(), "location"), (snapshot) => {
-        let _cusId = ParcelData.parcel[0].customer_id
-        setCustData(snapshot.docs.find(e => (e.data().customerId == _cusId, _cusId))?.data());
+      onSnapshot(query(collection(getFirestore(), "location"),where("customerId","==",_cusId)), (snapshot) => {
+        
+        setCustData(e.data());
         setUpDirect(false)
        console.log(snapshot.docs.map(e=>e.data()));
       //  collection(getFirestore(), "location")
