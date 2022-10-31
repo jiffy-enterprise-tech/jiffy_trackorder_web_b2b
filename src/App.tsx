@@ -268,7 +268,7 @@ function Track() {
       <Container>
         {
           isLoaded && CustData?.latitude ?
-            <>{(Par?.order_status  !== "Delivered"|| Par?.order_status  !== "Cancelled")&&
+            <>{(Par?.order_status  !== "Delivered")|| (Par?.order_status  !== "Cancelled")&&
               <>
               <Typography sx={{marginTop:"10px"}} color="success" level='h6'>
                 Order Status: 
