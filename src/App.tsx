@@ -158,7 +158,7 @@ function Track() {
       if (data.status == "Success") {
         setParcelData(data)
       } else {
-        setParcelData({ err: "ERRO" })
+        setParcelData({ err: "customer id is not provided" })
       }
 
     })
@@ -175,7 +175,7 @@ function Track() {
     //   })
     // }
     let _cusId = Par?.customer_id
-    console.log(CustData,"qq");
+   //console.log(CustData,"qq");
         
     if (Par?.customer_id) {
       onSnapshot(query(collection(getFirestore(), "location"),where("customerId","==",_cusId)), (snapshot) => {
@@ -185,10 +185,9 @@ function Track() {
           setUpDirect(false)
         }else{
           setCustData({ err: "customer id is not found" })
-          console.log("wwwwww");
-          
+
         }
-       console.log(snapshot.docs.map(e=>e.data()),"erafsdfsdf");
+       //console.log(snapshot.docs.map(e=>e.data()),"erafsdfsdf");
       //  collection(getFirestore(), "location")
 
       
@@ -199,9 +198,8 @@ function Track() {
 
 
       });
-    } else {
-      setCustData({ err: "customer id is not provided" })
-    }
+    } 
+    
   }, [ParcelData])
 
 
@@ -285,7 +283,7 @@ function Track() {
               <Typography  color="success" level="body1">
                 {Par?.order_status}
               </Typography>
-              {CustData?.err && <>
+              {(CustData?.err||ParcelData?.err) && <>
              
               
               
