@@ -11,7 +11,7 @@ import {
   Route, useParams
 } from "react-router-dom";
 import { css } from '@emotion/css'
-import { AiFillCloseCircle } from 'react-icons/ai'
+import { AiFillCloseCircle, AiOutlineAlert } from 'react-icons/ai'
 
 import axios from 'axios';
 const router = createBrowserRouter([
@@ -175,14 +175,20 @@ function Track() {
     //   })
     // }
     let _cusId = Par?.customer_id
-    console.log(Par?.customer_id,Par,"eeeeeeee");
-    
+    console.log(CustData,"qq");
+        
     if (Par?.customer_id) {
       onSnapshot(query(collection(getFirestore(), "location"),where("customerId","==",_cusId)), (snapshot) => {
-        
-        setCustData(snapshot.docs.map(e=>e.data())[0]);
-        setUpDirect(false)
-      // console.log(snapshot.docs.map(e=>e.data()),"erafsdfsdf");
+        let _customer=snapshot.docs.map(e=>e.data())[0]
+        if(_customer){
+          setCustData(_customer);
+          setUpDirect(false)
+        }else{
+          setCustData({ err: "customer id is not found" })
+          console.log("wwwwww");
+          
+        }
+       console.log(snapshot.docs.map(e=>e.data()),"erafsdfsdf");
       //  collection(getFirestore(), "location")
 
       
@@ -245,7 +251,7 @@ function Track() {
       <div>
         {JSON.stringify(CustData)}
       </div>
-      {CustData?.err && <>{CustData.err}sss</>}
+   
       {loadError&&<div>ere</div>}  */}
       {/* {getEndLoc()&&<div>{JSON.stringify(getEndLoc())}</div>} */}
       {Direct?.status == "ZERO_RESULTS" && <Box>
@@ -267,7 +273,7 @@ function Track() {
 
         </Alert>
       </Box>}
-
+         
       <Container>
         {
           isLoaded && CustData?.latitude ?
@@ -279,6 +285,11 @@ function Track() {
               <Typography  color="success" level="body1">
                 {Par?.order_status}
               </Typography>
+              {CustData?.err && <>
+             
+              
+              
+              </>}
               <GoogleMap
                 mapContainerStyle={containerStyle}
                 onLoad={(map:google.maps.Map) => {
@@ -382,11 +393,26 @@ function Track() {
                 </div>
               }
             </>
-            : <div className={css`
+            :  <div className={css`
                 height:80vh;
                 display:flex
           `}>
-              <CircularProgress sx={{ margin: "auto" }} size="lg" />
+              {
+                CustData?.err?
+                <Alert
+                startDecorator={
+
+                  <div>
+                    <AiOutlineAlert size={30}/>
+                  </div>
+      
+                }
+                sx={{ margin: "auto", fontSize:"20px" }} color="danger" >
+                {CustData.err} 
+
+              </Alert>
+                :<CircularProgress sx={{ margin: "auto" }} size="lg" />
+              }
             </div>
 
 
