@@ -173,7 +173,7 @@ function Track() {
     //     lng: Data.longitude
     //   })
     // }
-let _cusId = ParcelData.parcel[0].customer_id
+let _cusId = Par?.customer_id
     if (Par?.customer_id) {
       onSnapshot(query(collection(getFirestore(), "location"),where("customerId","==",_cusId)), (snapshot) => {
         
