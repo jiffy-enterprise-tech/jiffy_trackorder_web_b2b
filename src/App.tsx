@@ -1,7 +1,7 @@
 import { Stack, Typography, Alert, Box, IconButton, Container, CircularProgress, Divider } from '@mui/joy'
 
 import { useEffect, useState } from 'react'
-import { GoogleMap, DirectionsRenderer, LoadScript, useJsApiLoader, DirectionsService } from '@react-google-maps/api';
+import { GoogleMap, DirectionsRenderer, LoadScript, useJsApiLoader, DirectionsService, GoogleMapProps } from '@react-google-maps/api';
 import { MarkerF } from '@react-google-maps/api';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, query,where, getDocs, onSnapshot, doc, setDoc } from 'firebase/firestore';
@@ -142,6 +142,7 @@ function Track() {
 
   const [Direct, setDirect] = useState<any>(null)
   const [UpDirect, setUpDirect] = useState(false)
+  const [map, setMap] = useState<null|google.maps.Map>(null)
 
 
   useEffect(() => {
@@ -173,13 +174,15 @@ function Track() {
     //     lng: Data.longitude
     //   })
     // }
-let _cusId = Par?.customer_id
+    let _cusId = Par?.customer_id
+    console.log(Par?.customer_id,Par,"eeeeeeee");
+    
     if (Par?.customer_id) {
       onSnapshot(query(collection(getFirestore(), "location"),where("customerId","==",_cusId)), (snapshot) => {
         
-       // setCustData(snapshot.docs.map(e=>e.data()));
+        setCustData(snapshot.docs.map(e=>e.data())[0]);
         setUpDirect(false)
-       console.log(snapshot.docs.map(e=>e.data()),"erafsdfsdf");
+      // console.log(snapshot.docs.map(e=>e.data()),"erafsdfsdf");
       //  collection(getFirestore(), "location")
 
       
@@ -278,11 +281,15 @@ let _cusId = Par?.customer_id
               </Typography>
               <GoogleMap
                 mapContainerStyle={containerStyle}
-                center={{
-                  lat: Number(CustData.latitude),
-                  lng: Number(CustData.longitude)
+                onLoad={(map:google.maps.Map) => {
+                  setMap(map)
                 }}
-                zoom={10}
+                
+                // onZoomChanged={() => {
+                //  // console.log(map?.zoom,"q")
+
+                // }}
+                zoom={map?.getZoom()}
               >
 
                 <MarkerF
