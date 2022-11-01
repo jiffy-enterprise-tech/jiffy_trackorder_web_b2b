@@ -95,8 +95,8 @@ function App() {
   )
 }
 
-
-
+let map:any;
+let mapZoom:any;
 function Track() {
   let { id } = useParams()
 
@@ -142,7 +142,8 @@ function Track() {
 
   const [Direct, setDirect] = useState<any>(null)
   const [UpDirect, setUpDirect] = useState(false)
-  const [map, setMap] = useState<null|google.maps.Map>(null)
+  // const [map, setMap] = useState<null|google.maps.Map>(null)
+  const [mapZoom, setMapZoom] = useState<null|number>(10)
 
 
   useEffect(() => {
@@ -154,7 +155,7 @@ function Track() {
     //   enableHighAccuracy: true,
     // })
 
-    axios.get("https://apis.staging.jiffy.ae/vendor/api/v1/parcel", { params: { _id: id } }).then(({ data }) => {
+    axios.get("https://apis.jiffy.ae/vendor/api/v1/parcel", { params: { _id: id } }).then(({ data }) => {
       if (data.status == "Success") {
         setParcelData(data)
       } else {
@@ -166,6 +167,17 @@ function Track() {
   }, [0])
 
 
+  useEffect(()=>{
+    let timer1 = setTimeout(() => setUpDirect(false), 3 * 1000);
+
+    // this will clear Timeout
+    // when component unmount like in willComponentUnmount
+    // and show will not change to true
+    return () => {
+      clearTimeout(timer1);
+    };
+
+  },[UpDirect])
   useEffect(() => {
     // console.log("newwwwwwwwwwwwwww", Data, id);
     // if (Data) {
@@ -178,7 +190,7 @@ function Track() {
    //console.log(CustData,"qq");
         
     if (Par?.customer_id) {
-      onSnapshot(query(collection(getFirestore(), "location_test"),where("customerId","==",_cusId)), (snapshot) => {
+      onSnapshot(query(collection(getFirestore(), "location"),where("customerId","==",_cusId)), (snapshot) => {
         let _customer=snapshot.docs.map(e=>e.data())[0]
         if(_customer){
           setCustData(_customer);
@@ -288,17 +300,16 @@ function Track() {
               
               
               </>}
-              <GoogleMap
-                mapContainerStyle={containerStyle}
              
-                // onZoomChanged={() => {
-                //  // console.log(map?.zoom,"q")
-                center={
-                  {lat: Number(CustData.latitude),
-                  lng: Number(CustData.longitude)}
-                }
-                // }}
-                zoom={10}
+             
+              <GoogleMap
+                onLoad={(e)=>{
+                  map=e
+                }}
+                mapContainerStyle={containerStyle}
+               
+              center={!Direct?{lat: Number(CustData.latitude),
+                lng: Number(CustData.longitude)}:undefined}
               >
 
                 <MarkerF
@@ -331,7 +342,8 @@ function Track() {
                         lng: Number(e.pickup_longitude)
                       }} />
                   ))}
-
+                
+                
                 {getEndLoc()&& !UpDirect && <DirectionsService
                   
                   options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
@@ -367,8 +379,13 @@ function Track() {
                   Direct && <DirectionsRenderer
                     // required
                     options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                      directions: Direct
+                      directions: {...Direct,origin:{location:{lat:5,lng:8}}},
+                      suppressMarkers:true,
+                      suppressBicyclingLayer:true,
+                      suppressInfoWindows:true
                     }}
+                    
+                    
                     // optional
                     onLoad={directionsRenderer => {
                       console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
