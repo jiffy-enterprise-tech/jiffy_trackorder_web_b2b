@@ -295,9 +295,9 @@ function Track() {
               <Typography  color="success" level="body1">
                 {Par?.order_status}
               </Typography>
-              {(CustData?.err||ParcelData?.err) && <>
+              {CustData?.err && <>
              
-              
+              <Alert>{CustData?.err}</Alert>
               
               </>}
              
@@ -414,7 +414,7 @@ function Track() {
                 display:flex
           `}>
               {
-                CustData?.err?
+                (CustData?.err  || ParcelData?.err)?
                 <Alert
                 startDecorator={
 
@@ -424,7 +424,7 @@ function Track() {
       
                 }
                 sx={{ margin: "auto", fontSize:"20px" }} color="danger" >
-                {CustData.err} 
+                {CustData?.err}<br/> {ParcelData?.err} 
 
               </Alert>
                 :<CircularProgress sx={{ margin: "auto" }} size="lg" />
