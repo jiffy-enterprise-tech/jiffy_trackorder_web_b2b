@@ -154,7 +154,7 @@ function Track() {
     //   enableHighAccuracy: true,
     // })
 
-    axios.get("https://apis.jiffy.ae/vendor/api/v1/parcel", { params: { _id: id } }).then(({ data }) => {
+    axios.get("https://apis.staging.jiffy.ae/vendor/api/v1/parcel", { params: { _id: id } }).then(({ data }) => {
       if (data.status == "Success") {
         setParcelData(data)
       } else {
@@ -178,11 +178,11 @@ function Track() {
    //console.log(CustData,"qq");
         
     if (Par?.customer_id) {
-      onSnapshot(query(collection(getFirestore(), "location"),where("customerId","==",_cusId)), (snapshot) => {
+      onSnapshot(query(collection(getFirestore(), "location_test"),where("customerId","==",_cusId)), (snapshot) => {
         let _customer=snapshot.docs.map(e=>e.data())[0]
         if(_customer){
           setCustData(_customer);
-          setUpDirect(false)
+          //setUpDirect(false)
         }else{
           setCustData({ err: "customer id is not found" })
 
@@ -290,15 +290,15 @@ function Track() {
               </>}
               <GoogleMap
                 mapContainerStyle={containerStyle}
-                onLoad={(map:google.maps.Map) => {
-                  setMap(map)
-                }}
-                
+             
                 // onZoomChanged={() => {
                 //  // console.log(map?.zoom,"q")
-
+                center={
+                  {lat: Number(CustData.latitude),
+                  lng: Number(CustData.longitude)}
+                }
                 // }}
-                zoom={map?.getZoom()}
+                zoom={10}
               >
 
                 <MarkerF
@@ -346,6 +346,7 @@ function Track() {
                   // required
                   callback={(e) => {
                     //console.log(JSON.stringify(e)==JSON.stringify(Direct),"qq",e,Direct);
+                    
                     if (e) {
                       setDirect(e)
                       setUpDirect(true)
