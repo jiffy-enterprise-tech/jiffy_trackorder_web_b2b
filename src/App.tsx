@@ -307,8 +307,8 @@ function Track() {
                   map=e
                 }}
                 mapContainerStyle={containerStyle}
-               
-              center={!Direct?{lat: Number(CustData.latitude),
+               zoom={Direct?.status == "ZERO_RESULTS"?10:undefined}
+              center={Direct?.status == "ZERO_RESULTS"?{lat: Number(CustData.latitude),
                 lng: Number(CustData.longitude)}:undefined}
               >
 
