@@ -156,7 +156,7 @@ function Track() {
     // })
 
     axios.get("https://apis.jiffy.ae/vendor/api/v1/parcel", { params: { _id: id } }).then(({ data }) => {
-      if (data.status == "Success") {
+      if (data.status == "Success" && data?.parcel?.length>0) {
         setParcelData(data)
       } else {
         setParcelData({ err: "customer id is not provided" })
@@ -424,7 +424,13 @@ function Track() {
       
                 }
                 sx={{ margin: "auto", fontSize:"20px" }} color="danger" >
-                {CustData?.err}<br/> {ParcelData?.err} 
+                <div>
+                {CustData?.err} 
+                </div>
+                <div>
+
+                {ParcelData?.err} 
+                </div>
 
               </Alert>
                 :<CircularProgress sx={{ margin: "auto" }} size="lg" />
