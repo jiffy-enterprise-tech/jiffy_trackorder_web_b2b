@@ -394,7 +394,7 @@ function Track() {
                       console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
                     }}
                     onDirectionsChanged={()=>{
-                      setLoaded(true)
+                      //setLoaded(true)
                       
                     }}
                     // optional
