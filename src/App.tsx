@@ -392,7 +392,10 @@ function Track() {
                     // optional
                     onLoad={directionsRenderer => {
                       console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+                    }}
+                    onDirectionsChanged={()=>{
                       setLoaded(true)
+                      
                     }}
                     // optional
                     onUnmount={directionsRenderer => {
