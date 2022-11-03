@@ -110,10 +110,8 @@ function Track() {
 
 
 
-  const [CorrLoc, setCorrLoc] = useState({
-    lat: 11.1407247,
-    lng: 75.964
-  })
+
+  
   let Par=ParcelData?.parcel?.[0]
 
   function getEndLoc() {
@@ -306,8 +304,11 @@ function Track() {
                 onLoad={(e)=>{
                   map=e
                 }}
+                
+              
                 mapContainerStyle={containerStyle}
-               zoom={Direct?.status == "ZERO_RESULTS"?10:undefined}
+               zoom={3}
+              
               center={Direct?.status == "ZERO_RESULTS"?{lat: Number(CustData.latitude),
                 lng: Number(CustData.longitude)}:undefined}
               >
@@ -379,10 +380,11 @@ function Track() {
                   Direct && <DirectionsRenderer
                     // required
                     options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                      directions: {...Direct,origin:{location:{lat:5,lng:8}}},
+                      directions:Direct,
                       suppressMarkers:true,
                       suppressBicyclingLayer:true,
-                      suppressInfoWindows:true
+                      suppressInfoWindows:true,
+                      preserveViewport:true
                     }}
                     
                     
