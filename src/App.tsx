@@ -383,7 +383,7 @@ function Track() {
                       directions: {...Direct,origin:{location:{lat:5,lng:8}}},
                       suppressMarkers:true,
                       
-                      preserveViewport:Loaded
+                      preserveViewport:false
                      
                       
                     }}
