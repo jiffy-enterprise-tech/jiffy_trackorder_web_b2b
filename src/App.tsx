@@ -109,7 +109,7 @@ function Track() {
   //const [Center, setCenter] = useState<any>(null)
 
 
-
+  const [Loaded, setLoaded] = useState(false)
 
   
   let Par=ParcelData?.parcel?.[0]
@@ -304,7 +304,7 @@ function Track() {
                 onLoad={(e)=>{
                   map=e
                 }}
-                
+
               
                 mapContainerStyle={containerStyle}
                zoom={3}
@@ -380,16 +380,18 @@ function Track() {
                   Direct && <DirectionsRenderer
                     // required
                     options={{ // eslint-disable-line react-perf/jsx-no-new-object-as-prop
-                      directions:Direct,
+                      directions: {...Direct,origin:{location:{lat:5,lng:8}}},
                       suppressMarkers:true,
-                      suppressBicyclingLayer:true,
-                      suppressInfoWindows:true,
-                      preserveViewport:true
+                      
+                      preserveViewport:Loaded
+                     
+                      
                     }}
                     
                     
                     // optional
                     onLoad={directionsRenderer => {
+                      setLoaded(true)
                       console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
                     }}
                     // optional
