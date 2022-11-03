@@ -392,10 +392,10 @@ function Track() {
                     // optional
                     onLoad={directionsRenderer => {
                       console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+                      setLoaded(true)
                     }}
                     // optional
                     onUnmount={directionsRenderer => {
-                      setLoaded(true)
 
                       console.log('DirectionsRenderer onUnmount directionsRenderer: ', directionsRenderer)
                     }}
